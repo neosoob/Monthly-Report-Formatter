@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文字序号转换器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .input-section, .output-section {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .output-area {
+            background-color: #f9f9f9;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            padding: 12px;
+            min-height: 150px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>文字序号转换器</h1>
+        
+        <div class="input-section">
+            <label for="inputText">请输入多行文字：</label>
+            <textarea id="inputText" placeholder="在此输入多行文字，每行一条内容..."></textarea>
+        </div>
+        
+        <div class="input-section">
+            <label for="suffixText">后缀（可选）：</label>
+            <input type="text" id="suffixText" placeholder="在此输入后缀内容，将添加到每行末尾..." style="width: 100%; padding: 8px; border: 2px solid #ddd; border-radius: 5px; font-size: 14px; box-sizing: border-box;">
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button onclick="convertText()">转换</button>
+            <button onclick="removeLastPeriod()" style="background-color: #ff9800;">删除最后句号</button>
+            <button onclick="copyOutput()" style="background-color: #2196F3;">复制内容</button>
+        </div>
+        
+        <div class="output-section">
+            <label for="outputText">转换结果：</label>
+            <div id="outputText" class="output-area"></div>
+        </div>
+    </div>
+
+    <script>
+        function convertText() {
+            const inputText = document.getElementById('inputText').value;
+            const suffixText = document.getElementById('suffixText').value;
+            const outputElement = document.getElementById('outputText');
+            
+            if (!inputText.trim()) {
+                outputElement.textContent = '请输入要转换的文字';
+                return;
+            }
+            
+            // 按行分割文本，过滤空行
+            const lines = inputText.split('\n').filter(line => line.trim() !== '');
+            
+            if (lines.length === 0) {
+                outputElement.textContent = '没有有效的文本内容';
+                return;
+            }
+            
+            // 为每行添加序号和后缀
+            const numberedLines = lines.map((line, index) => {
+                let result = `${index + 1}. ${line.trim()}`;
+                if (suffixText.trim()) {
+                    result += suffixText;
+                }
+                return result;
+            });
+            
+            // 将结果合并为字符串并显示
+            outputElement.textContent = numberedLines.join('\n');
+        }
+        
+        // 添加回车键支持
+        document.getElementById('inputText').addEventListener('keydown', function(event) {
+            if (event.ctrlKey && event.key === 'Enter') {
+                convertText();
+            }
+        });
+        
+        // 删除输出框每行最后的句号
+        function removeLastPeriod() {
+            const outputElement = document.getElementById('outputText');
+            let content = outputElement.textContent;
+            
+            if (content.trim()) {
+                // 按行分割，删除每行最后的句号（半角或全角）
+                const lines = content.split('\n');
+                const processedLines = lines.map(line => {
+                    return line.replace(/[.。]\s*$/, '');
+                });
+                
+                // 重新组合为字符串
+                outputElement.textContent = processedLines.join('\n');
+            }
+        }
+        
+        // 复制输出框内容到剪贴板
+        function copyOutput() {
+            const outputElement = document.getElementById('outputText');
+            const content = outputElement.textContent;
+            
+            if (!content.trim()) {
+                alert('输出框为空，没有内容可复制');
+                return;
+            }
+            
+            navigator.clipboard.writeText(content).then(function() {
+                // 复制成功，不显示弹窗提示
+            }).catch(function(err) {
+                console.error('复制失败: ', err);
+                alert('复制失败，请手动选择文本复制');
+            });
+        }
+    </script>
+</body>
+</html>
